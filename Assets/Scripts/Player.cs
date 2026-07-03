@@ -7,25 +7,31 @@ public class Player : MonoBehaviour
 
     PlayerInput playerInput;
     private float speedMax;
+    [SerializeField] float accel;
+    Rigidbody rb;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        var moveVec = playerInput.actions["Move"].ReadValue<Vector2>();
+        var accelVec = playerInput.actions["Move"].ReadValue<Vector2>();
+
         var cameraDir = playerInput.camera.transform.forward;
         cameraDir.y = 0;
         cameraDir = cameraDir.normalized;
-        var moveVec3D = new Vector3(moveVec.x * speedMax, 0, moveVec.y * speedMax);
-        var cameraRight =playerInput.camera.transform.right;
-        _ = cameraDir * moveVec.y * speedMax + cameraRight * moveVec.x * speedMax;
-        transform.position = transform.position + moveVec3D * Time.deltaTime;
 
+        var cameraRight = playerInput.camera.transform.right;
+
+        var accelVec3D =
+            cameraDir * accelVec.y * accel
+            + cameraRight * accelVec.x * accel;
+        rb.AddForce(accelVec3D, ForceMode.Acceleration);
     }
 }
