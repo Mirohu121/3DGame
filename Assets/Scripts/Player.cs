@@ -6,15 +6,20 @@ public class Player : MonoBehaviour
 
 
     PlayerInput playerInput;
-    private float speedMax;
+   [SerializeField]  private float speedMax;
      [SerializeField] float accel;
     [SerializeField] float rotateSpeed;
     [SerializeField] Animator animator;
    [SerializeField] float jumpSpeed;
-
-    [SerializeField] float accel;
     Rigidbody rb;
     Vector3 rotateTarget;
+
+    [SerializeField] float groundNormalYMin = 0.7f;
+    bool isGrounded;
+
+    [SerializeField] float groundDamping = 8f;
+    [SerializeField] float airDamping = 0.5f;
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -22,7 +27,36 @@ public class Player : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         rb = GetComponent<Rigidbody>();
+        rb.sleepThreshold = -1;
     }
+
+
+    private void FixedUpdate()
+    {
+        
+        if(isGrounded)
+        {
+            rb.linearDamping = groundDamping;
+        }
+        else
+        {
+            rb.linearDamping = airDamping;
+        }
+        
+        isGrounded = false;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        foreach(var contact in collision.contacts)
+        {
+            if(contact.normal.y >=groundNormalYMin)
+            {
+                isGrounded = true;
+            }
+        }
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -62,4 +96,6 @@ public class Player : MonoBehaviour
             rb.AddForce(jumpVec,ForceMode.VelocityChange);
         }
     }
+
+    
 }
